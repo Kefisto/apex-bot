@@ -2,19 +2,26 @@ import discord
 from discord.ext import commands
 import re
 from fuzzywuzzy import fuzz
+import custom_commands
 
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-MONITORED_CATEGORY_ID = 1253302501323702285  # ID категории, которую нужно мониторить
-TARGET_CATEGORY_ID = 932712057546080316  # ID категории, куда нужно перемещать каналы
+MONITORED_CATEGORY_ID = 1253302501323702285
+TARGET_CATEGORY_ID = 932712057546080316
 TRIGGER_MESSAGE = "запросил разрешение на закрытие этого обращения"
-SIMILARITY_THRESHOLD = 80  # Порог схожести для нечеткого сравнения (0-100)
+SIMILARITY_THRESHOLD = 80
 
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    custom_commands.setup(bot, move_channel, MONITORED_CATEGORY_ID)
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} command(s)")
+    except Exception as e:
+        print(f"Failed to sync commands: {e}")
 
 @bot.event
 async def on_message(message):
@@ -37,7 +44,7 @@ async def process_message(message_or_interaction):
     if channel.category_id == MONITORED_CATEGORY_ID:
         print(f"Новое сообщение/взаимодействие в канале {channel.name}:")
         print(f"Содержимое: {content}")
-        
+
         if content is None or check_trigger(content):
             print("Обнаружено триггерное сообщение или пустое содержимое!")
             await move_channel(channel)
@@ -68,23 +75,23 @@ def get_interaction_content(interaction):
 def check_trigger(content):
     if content is None:
         return True
-    
+
     # Метод 1: Частичное совпадение
     if "запросил разрешение" in content and "закрытие" in content:
         print("Сработал метод 1: Частичное совпадение")
         return True
-    
+
     # Метод 2: Нечеткое сравнение
     similarity = fuzz.partial_ratio(TRIGGER_MESSAGE, content)
     if similarity >= SIMILARITY_THRESHOLD:
         print(f"Сработал метод 2: Нечеткое сравнение (схожесть: {similarity}%)")
         return True
-    
+
     # Метод 3: Регулярное выражение
     if re.search(r'запросил.*разрешение.*закрытие.*обращения', content):
         print("Сработал метод 3: Регулярное выражение")
         return True
-    
+
     return False
 
 async def move_channel(channel):
