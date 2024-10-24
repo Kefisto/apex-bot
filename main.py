@@ -25,6 +25,7 @@ async def on_ready():
     except Exception as e:
         print(f"Failed to sync commands: {e}")
 
+
 # Остальной код остается без изменений
 
 @bot.event
@@ -101,14 +102,14 @@ def check_trigger(content):
     return False
 
 
-async def move_channel(channel):
-    target_category = bot.get_channel(TARGET_CATEGORY_ID)
+async def move_channel(channel, target_category_id):
+    target_category = bot.get_channel(target_category_id)
     if target_category:
         await channel.edit(category=target_category)
         await channel.send(f"Канал перемещен в категорию {target_category.name}")
         print(f"Канал {channel.name} перемещен в категорию {target_category.name}")
     else:
-        print(f"Ошибка: категория с ID {TARGET_CATEGORY_ID} не найдена")
+        print(f"Ошибка: категория с ID {target_category_id} не найдена")
 
 bot.run('MTI5OTA0NDg0Mzk2MzU0NzY0OQ.G3NY2p.6RZIRIXp8ONf9CQtCgI8fyQlEWPc2dKMcLQAzU')
 
