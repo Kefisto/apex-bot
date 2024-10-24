@@ -3,6 +3,7 @@ from discord.ext import commands
 import re
 from fuzzywuzzy import fuzz
 import custom_commands
+import buyer_command
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -17,11 +18,14 @@ SIMILARITY_THRESHOLD = 80
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
     custom_commands.setup(bot, move_channel, MONITORED_CATEGORY_ID)
+    buyer_command.setup(bot)
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
+
+# Остальной код остается без изменений
 
 @bot.event
 async def on_message(message):
@@ -32,7 +36,6 @@ async def on_message(message):
 async def on_interaction(interaction):
     if interaction.type == discord.InteractionType.application_command:
         await process_message(interaction)
-
 async def process_message(message_or_interaction):
     if isinstance(message_or_interaction, discord.Interaction):
         channel = message_or_interaction.channel
@@ -45,11 +48,15 @@ async def process_message(message_or_interaction):
         print(f"Новое сообщение/взаимодействие в канале {channel.name}:")
         print(f"Содержимое: {content}")
 
-        if content is None or check_trigger(content):
-            print("Обнаружено триггерное сообщение или пустое содержимое!")
+        if content is not None and check_trigger(content):
+            print("Обнаружено триггерное сообщение!")
             await move_channel(channel)
         else:
-            print("Триггерное сообщение не обнаружено.")
+            if content is None:
+                print("Пустое содержимое. Канал не будет перемещен.")
+            else:
+                print("Триггерное сообщение не обнаружено.")
+
 
 def get_message_content(message):
     if message.content:
@@ -71,10 +78,9 @@ def get_interaction_content(interaction):
         content = ' '.join([str(option['value']) for option in interaction.data['options']])
         return content.lower() if content else None
     return None
-
 def check_trigger(content):
     if content is None:
-        return True
+        return False
 
     # Метод 1: Частичное совпадение
     if "запросил разрешение" in content and "закрытие" in content:
@@ -94,6 +100,7 @@ def check_trigger(content):
 
     return False
 
+
 async def move_channel(channel):
     target_category = bot.get_channel(TARGET_CATEGORY_ID)
     if target_category:
@@ -104,3 +111,4 @@ async def move_channel(channel):
         print(f"Ошибка: категория с ID {TARGET_CATEGORY_ID} не найдена")
 
 bot.run('MTI5OTA0NDg0Mzk2MzU0NzY0OQ.G3NY2p.6RZIRIXp8ONf9CQtCgI8fyQlEWPc2dKMcLQAzU')
+
