@@ -25,11 +25,12 @@ class MoveChannelCommand(app_commands.Command):
         self.monitored_category_id = monitored_category_id
 
     @has_required_role()
-    async def move_channel_callback(self, interaction: discord.Interaction, category: app_commands.Choice[int]):
+    async def move_channel_callback(self, interaction: discord.Interaction, category: int):
         channel = interaction.channel
         if channel.category_id == self.monitored_category_id:
-            await self.move_channel_func(channel, category.value)
-            await interaction.response.send_message(f"Канал {channel.name} был перемещен в категорию {category.name}.", ephemeral=True)
+            await self.move_channel_func(channel, category)
+            category_name = next((choice.name for choice in self.category_choices if choice.value == category), "Unknown")
+            await interaction.response.send_message(f"Канал {channel.name} был перемещен в категорию {category_name}.", ephemeral=True)
         else:
             await interaction.response.send_message("Этот канал нельзя переместить, так как он не находится в отслеживаемой категории.", ephemeral=True)
 
@@ -37,13 +38,15 @@ def setup(bot, move_channel_func, monitored_category_id):
     move_command = MoveChannelCommand(move_channel_func, monitored_category_id)
     move_command.add_check(has_required_role())
 
+    category_choices = [
+        app_commands.Choice(name="Обращение в обработке", value=1253302501323702285),
+        app_commands.Choice(name="Ожидание ответа", value=909692673957453824),
+        app_commands.Choice(name="Ожидание закрытия", value=932712057546080316)
+    ]
+    move_command.category_choices = category_choices
     @move_command.autocomplete('category')
     async def category_autocomplete(interaction: discord.Interaction, current: str):
-        choices = [
-            app_commands.Choice(name="Обращение в обработке", value=1253302501323702285),
-            app_commands.Choice(name="Ожидание ответа", value=909692673957453824),
-            app_commands.Choice(name="Ожидание закрытия", value=932712057546080316)
-        ]
-        return choices
+        return [choice for choice in category_choices if current.lower() in choice.name.lower()]
 
     bot.tree.add_command(move_command)
+

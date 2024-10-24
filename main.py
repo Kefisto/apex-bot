@@ -112,4 +112,3 @@ async def move_channel(channel, target_category_id):
         print(f"Ошибка: категория с ID {target_category_id} не найдена")
 
 bot.run('MTI5OTA0NDg0Mzk2MzU0NzY0OQ.G3NY2p.6RZIRIXp8ONf9CQtCgI8fyQlEWPc2dKMcLQAzU')
-
