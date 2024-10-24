@@ -26,7 +26,7 @@ async def on_ready():
         print(f"Failed to sync commands: {e}")
 
 
-# Остальной код остается без изменений
+# Остальной код остается без изменений da
 
 @bot.event
 async def on_message(message):
