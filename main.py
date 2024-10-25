@@ -26,7 +26,8 @@ async def on_ready():
         print(f"Failed to sync commands: {e}")
 
 
-# Остальной код остается без изменений da
+
+#хуйня
 
 @bot.event
 async def on_message(message):
@@ -49,14 +50,25 @@ async def process_message(message_or_interaction):
         print(f"Новое сообщение/взаимодействие в канале {channel.name}:")
         print(f"Содержимое: {content}")
 
-        if content is not None and check_trigger(content):
+        if content is not None and content != '' and check_trigger(content):
             print("Обнаружено триггерное сообщение!")
             await move_channel(channel)
+        elif content is not None and content != '' and content.startswith('/closerequest'):
+            print("Обнаружена команда /closerequest!")
+            await move_channel(channel, str(TARGET_CATEGORY_ID))
+        elif content is not None and content != '' and '883083155953836072' in content:  # Add the command ID here
+            print("Обнаружена команда с указанным идентификатором!")
+            await move_channel(channel, TARGET_CATEGORY_ID)  # Add the target category ID here
         else:
-            if content is None:
+            if content is None or content == '':
                 print("Пустое содержимое. Канал не будет перемещен.")
             else:
                 print("Триггерное сообщение не обнаружено.")
+
+
+
+#говнокод
+
 
 
 def get_message_content(message):
@@ -102,13 +114,14 @@ def check_trigger(content):
     return False
 
 
-async def move_channel(channel, target_category_id):
-    target_category = bot.get_channel(target_category_id)
+async def move_channel(channel, target_category_id: str):
+    target_category = bot.get_channel(int(target_category_id))
     if target_category:
         await channel.edit(category=target_category)
         await channel.send(f"Канал перемещен в категорию {target_category.name}")
         print(f"Канал {channel.name} перемещен в категорию {target_category.name}")
     else:
         print(f"Ошибка: категория с ID {target_category_id} не найдена")
+
 
 bot.run('MTI5OTA0NDg0Mzk2MzU0NzY0OQ.G3NY2p.6RZIRIXp8ONf9CQtCgI8fyQlEWPc2dKMcLQAzU')
