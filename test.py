@@ -8,7 +8,7 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 MONITORED_CATEGORY_ID = [1253302501323702285, 909692673957453824]
-BOT_TOKEN = 'MTI5OTA0NDg0Mzk2MzU0NzY0OQ.G3NY2p.6RZIRIXp8ONf9CQtCgI8fyQlEWPc2dKMcLQAzU'
+BOT_TOKEN = ''
 
 # ID категорий
 PROCESSING_CATEGORY_ID = 1253302501323702285  # ID категории "обработка"
